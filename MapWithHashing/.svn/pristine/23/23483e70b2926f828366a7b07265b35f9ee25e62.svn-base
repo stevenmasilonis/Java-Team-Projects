@@ -1,0 +1,445 @@
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
+import components.map.Map;
+//import components.map.MapSecondary.SimplePair;
+import components.map.Map.Pair;
+
+/**
+ * JUnit test fixture for {@code Map<String, String>}'s constructor and kernel
+ * methods.
+ *
+ * @author Aaron Lucas and Steven Masilonis
+ *
+ */
+public abstract class MapTest {
+
+    /**
+     * Invokes the appropriate {@code Map} constructor for the implementation
+     * under test and returns the result.
+     *
+     * @return the new map
+     * @ensures constructorTest = {}
+     */
+    protected abstract Map<String, String> constructorTest();
+
+    /**
+     * Invokes the appropriate {@code Map} constructor for the reference
+     * implementation and returns the result.
+     *
+     * @return the new map
+     * @ensures constructorRef = {}
+     */
+    protected abstract Map<String, String> constructorRef();
+
+    /**
+     *
+     * Creates and returns a {@code Map<String, String>} of the implementation
+     * under test type with the given entries.
+     *
+     * @param args
+     *            the (key, value) pairs for the map
+     * @return the constructed map
+     * @requires <pre>
+     * [args.length is even]  and
+     * [the 'key' entries in args are unique]
+     * </pre>
+     * @ensures createFromArgsTest = [pairs in args]
+     */
+    private Map<String, String> createFromArgsTest(String... args) {
+        assert args.length % 2 == 0 : "Violation of: args.length is even";
+        Map<String, String> map = this.constructorTest();
+        for (int i = 0; i < args.length; i += 2) {
+            assert !map.hasKey(args[i]) : ""
+                    + "Violation of: the 'key' entries in args are unique";
+            map.add(args[i], args[i + 1]);
+        }
+        return map;
+    }
+
+    /**
+     *
+     * Creates and returns a {@code Map<String, String>} of the reference
+     * implementation type with the given entries.
+     *
+     * @param args
+     *            the (key, value) pairs for the map
+     * @return the constructed map
+     * @requires <pre>
+     * [args.length is even]  and
+     * [the 'key' entries in args are unique]
+     * </pre>
+     * @ensures createFromArgsRef = [pairs in args]
+     */
+    private Map<String, String> createFromArgsRef(String... args) {
+        assert args.length % 2 == 0 : "Violation of: args.length is even";
+        Map<String, String> map = this.constructorRef();
+        for (int i = 0; i < args.length; i += 2) {
+            assert !map.hasKey(args[i]) : ""
+                    + "Violation of: the 'key' entries in args are unique";
+            map.add(args[i], args[i + 1]);
+        }
+        return map;
+    }
+
+    /**
+     * Test cases for constructor with no parameter.
+     */
+    @Test
+    public final void testNoArgumentConstructor() {
+        /*
+         * Set up variables and call method under test
+         */
+        Map<String, String> map = this.createFromArgsTest();
+        Map<String, String> mapExpected = this.createFromArgsRef();
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertEquals(mapExpected, map);
+    }
+
+    /**
+     * Test cases for constructor with parameter.
+     */
+    @Test
+    public final void testWithOnePairArgumentConstructor() {
+        /*
+         * Set up variables and call method under test
+         */
+        Map<String, String> map = this.createFromArgsTest("one", "1");
+        Map<String, String> mapExpected = this.createFromArgsRef("one", "1");
+
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertEquals(mapExpected, map);
+    }
+
+    /**
+     * Test cases for constructor with parameter.
+     */
+    @Test
+    public final void testWithManyPairsArgumentConstructor() {
+        /*
+         * Set up variables and call method under test
+         */
+        Map<String, String> map = this.createFromArgsTest("one", "1", "two",
+                "2", "three", "3");
+        Map<String, String> mapExpected = this.createFromArgsRef("one", "1",
+                "two", "2", "three", "3");
+
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertEquals(mapExpected, map);
+    }
+
+    /**
+     * Routine.
+     */
+    @Test
+    public final void testAddFromEmpty() {
+        /*
+         * Set up variables
+         */
+        Map<String, String> map = this.createFromArgsTest();
+        Map<String, String> mapExpected = this.createFromArgsRef("one", "1");
+        /*
+         * Call method under test
+         */
+        map.add("one", "1");
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertEquals(mapExpected, map);
+    }
+
+    /**
+     * Routine.
+     */
+    @Test
+    public final void testAddFromNonEmpty() {
+        /*
+         * Set up variables
+         */
+        Map<String, String> map = this.createFromArgsTest("one", "1");
+        Map<String, String> mapExpected = this.createFromArgsRef("one", "1",
+                "two", "2");
+        /*
+         * Call method under test
+         */
+        map.add("two", "2");
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertEquals(mapExpected, map);
+    }
+
+    /**
+     * Boundary.
+     */
+    @Test
+    public final void testRemoveLastPair() {
+        /*
+         * Set up variables
+         */
+        Map<String, String> map = this.createFromArgsTest("one", "1");
+        Map<String, String> mapExpected = this.createFromArgsRef("one", "1");
+
+        /*
+         * Call method under test
+         */
+        Pair<String, String> pair = map.remove("one");
+        Pair<String, String> pairExpected = mapExpected.remove("one");
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertEquals(mapExpected, map);
+        assertEquals(pairExpected, pair);
+    }
+
+    /**
+     * Routine.
+     */
+    @Test
+    public final void testRemoveOnePairLeft() {
+        /*
+         * Set up variables
+         */
+        Map<String, String> map = this.createFromArgsTest("one", "1", "two",
+                "2");
+        Map<String, String> mapExpected = this.createFromArgsRef("one", "1",
+                "two", "2");
+
+        /*
+         * Call method under test
+         */
+        Pair<String, String> pair = map.remove("two");
+        Pair<String, String> pairExpected = mapExpected.remove("two");
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertEquals(mapExpected, map);
+        assertEquals(pairExpected, pair);
+    }
+
+    /**
+     * Boundary.
+     */
+    @Test
+    public final void testRemoveAnyToEmpty() {
+        /*
+         * Set up
+         */
+        Map<String, String> map = this.createFromArgsTest("one", "1");
+        Map<String, String> mapExpected = this.createFromArgsRef("one", "1");
+
+        /*
+         * Call method
+         */
+        Pair<String, String> pair = map.removeAny();
+        Pair<String, String> pairExpected = mapExpected.removeAny();
+
+        /*
+         * Evaluation
+         */
+        assertEquals(mapExpected, map);
+        assertEquals(pairExpected, pair);
+    }
+
+    /**
+     * Routine.
+     */
+    @Test
+    public final void testRemoveAnyToNonEmpty() {
+        /*
+         * Set up
+         */
+        Map<String, String> map = this.createFromArgsTest("one", "1", "two",
+                "2", "three", "3");
+        Map<String, String> mapExpected = this.createFromArgsRef("one", "1",
+                "two", "2", "three", "3");
+        /*
+         * Call method
+         */
+        Pair<String, String> pair = map.removeAny();
+        /*
+         * Evaluation
+         */
+
+        assertEquals(true, mapExpected.hasKey(pair.key()));
+        Pair<String, String> pairExpected = mapExpected.remove(pair.key());
+        assertEquals(pairExpected, pair);
+    }
+
+    /**
+     * Routine.
+     */
+    @Test
+    public final void testValueRoutine1() {
+        /*
+         * Set up variables
+         */
+        Map<String, String> map = this.createFromArgsTest("one", "1", "two",
+                "2", "eight", "8", "three", "3");
+
+        /*
+         * Call method under test
+         */
+        String value = map.value("eight");
+        String expectedValue = ("8");
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertEquals(expectedValue, value);
+    }
+
+    /**
+     * Routine.
+     */
+    @Test
+    public final void testValueRoutine2() {
+        /*
+         * Set up variables
+         */
+        Map<String, String> map = this.createFromArgsTest("one", "1", "two",
+                "2");
+        /*
+         * Call method under test
+         */
+        String value = map.value("one");
+        String expectedValue = ("1");
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertEquals(expectedValue, value);
+
+    }
+
+    /**
+     * Routine.
+     */
+    @Test
+    public final void testHasKeyExistent() {
+        /*
+         * Set up variables
+         */
+        Map<String, String> map = this.createFromArgsTest("one", "1", "two",
+                "2");
+        Map<String, String> mapExpected = this.createFromArgsRef("one", "1",
+                "two", "2");
+        /*
+         * Call method under test
+         */
+        Boolean hasKey = map.hasKey("one");
+        Boolean hasKeyExpected = mapExpected.hasKey("one");
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertTrue(hasKey);
+        assertTrue(hasKeyExpected);
+    }
+
+    /**
+     * Test if no key.
+     */
+    @Test
+    public final void testHasKeyNonExistent() {
+        /*
+         * Set up variables
+         */
+        Map<String, String> map = this.createFromArgsTest("eight", "1", "two",
+                "2");
+        Map<String, String> mapExpected = this.createFromArgsRef("eight", "1",
+                "two", "2");
+        /*
+         * Call method under test
+         */
+        Boolean hasKey = !map.hasKey("one");
+        Boolean hasKeyExpected = !mapExpected.hasKey("one");
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertTrue(hasKey);
+        assertTrue(hasKeyExpected);
+    }
+
+    /**
+     * Test large map.
+     */
+    @Test
+    public final void testHasKeyExistentLargeMap() {
+        /*
+         * Set up variables
+         */
+        Map<String, String> map = this.createFromArgsTest("one", "1", "two",
+                "2", "three", "3", "four", "4", "five", "5", "six", "6",
+                "seven", "7", "eight", "8", "nine", "9", "ten", "10");
+        Map<String, String> mapExpected = this.createFromArgsRef("one", "1",
+                "two", "2", "three", "3", "four", "4", "five", "5", "six", "6",
+                "seven", "7", "eight", "8", "nine", "9", "ten", "10");
+        /*
+         * Call method under test
+         */
+        Boolean hasKey = map.hasKey("one");
+        Boolean hasKeyExpected = mapExpected.hasKey("one");
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertTrue(hasKey);
+        assertTrue(hasKeyExpected);
+
+    }
+
+    /**
+     * Boundary.
+     */
+    @Test
+    public final void testSizeEmpty() {
+        /*
+         * Set up variables
+         */
+        Map<String, String> map = this.createFromArgsTest();
+        Map<String, String> mapExpected = this.createFromArgsRef();
+
+        /*
+         * Call method under test
+         */
+        int size = map.size();
+        int sizeExpected = mapExpected.size();
+
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertEquals(sizeExpected, size);
+        assertEquals(mapExpected, map);
+    }
+
+    /**
+     * Routine.
+     */
+    @Test
+    public final void testSizeNonEmpty() {
+        /*
+         * Set up variables
+         */
+        Map<String, String> map = this.createFromArgsTest("one", "1", "two",
+                "2");
+        Map<String, String> mapExpected = this.createFromArgsRef("one", "1",
+                "two", "2");
+
+        /*
+         * Call method under test
+         */
+        int size = map.size();
+        int sizeExpected = mapExpected.size();
+
+        /*
+         * Assert that values of variables match expectations
+         */
+        assertEquals(sizeExpected, size);
+        assertEquals(mapExpected, map);
+    }
+}
